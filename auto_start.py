@@ -11,9 +11,9 @@ def start_environment():
         browser = p.chromium.launch(headless=True)
         context = browser.new_context()
 
-        # تزریق کوکی ورود به مرورگر
+        # تزریق کوکی session دریافت شده از مرورگر
         context.add_cookies([{
-            'name': '__Secure-next-auth.session-token',
+            'name': 'session',
             'value': session_cookie,
             'domain': 'prepare.sh',
             'path': '/',
@@ -25,18 +25,18 @@ def start_environment():
         page = context.new_page()
         print("Opening environments page...")
         page.goto("https://prepare.sh/profile/environments", wait_until="networkidle")
-        page.wait_for_timeout(3000)
+        page.wait_for_timeout(4000)
 
-        # جستجوی دکمه روشن کردن/ادامه
-        resume_button = page.locator("button:has-text('Resume'), button:has-text('Start'), a:has-text('Open')")
+        # بررسی وجود دکمه‌های روشن کردن
+        resume_button = page.locator("button:has-text('Resume'), button:has-text('Start'), a:has-text('Open'), button:has-text('Turn on')")
 
         if resume_button.is_visible():
-            print("Server is hibernated/stopped. Clicking to start...")
+            print("Server is hibernated. Clicking to start/resume...")
             resume_button.first.click()
             page.wait_for_timeout(5000)
-            print("Server started successfully!")
+            print("Server start command sent successfully!")
         else:
-            print("Server is already running.")
+            print("Server is already running or no start button found.")
 
         browser.close()
 
