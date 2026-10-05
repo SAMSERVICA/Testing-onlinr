@@ -11,7 +11,7 @@ def start_environment():
         browser = p.chromium.launch(headless=True)
         context = browser.new_context()
 
-        # تزریق کوکی session دریافت شده از مرورگر
+        # تزریق کوکی session
         context.add_cookies([{
             'name': 'session',
             'value': session_cookie,
@@ -24,13 +24,17 @@ def start_environment():
 
         page = context.new_page()
         print("Opening environments page...")
-        page.goto("https://prepare.sh/profile/environments", wait_until="networkidle")
-        page.wait_for_timeout(4000)
+        
+        # تغییر حالت انتظار به domcontentloaded تا گیر networkidle نیفته
+        page.goto("https://prepare.sh/profile/environments", wait_until="domcontentloaded", timeout=60000)
+        
+        # صبر برای لود کامل عناصر صفحه
+        page.wait_for_timeout(6000)
 
-        # بررسی وجود دکمه‌های روشن کردن
+        # جستجو برای دکمه‌های روشن کردن سرور
         resume_button = page.locator("button:has-text('Resume'), button:has-text('Start'), a:has-text('Open'), button:has-text('Turn on')")
 
-        if resume_button.is_visible():
+        if resume_button.count() > 0 and resume_button.first.is_visible():
             print("Server is hibernated. Clicking to start/resume...")
             resume_button.first.click()
             page.wait_for_timeout(5000)
